@@ -25,7 +25,7 @@ fi
 
 # 2. Configuration
 DATE_STR=$(date +"%Y%m%d")
-BASE_OUTPUT_DIR="$(pwd)/output"
+BASE_OUTPUT_DIR="/app/trivy-sbom/output"
 TODAY_OUTPUT_DIR="$BASE_OUTPUT_DIR/$DATE_STR"
 CACHE_DIR="$(pwd)/trivy-cache"
 
