@@ -71,7 +71,8 @@ chmod +x generate_sbom.sh
 ./generate_sbom.sh /path/to/your/app.jar
 ```
 
-**예시 2: 폴더 전체 스캔 (하위 폴더 포함)**
+**예시 2: 프로젝트 전체 스캔 (권장)**
+폴더를 지정하면, 해당 폴더 전체를 하나의 프로젝트로 인식하여 **통합 SBOM**을 생성합니다.
 ```bash
 ./generate_sbom.sh /path/to/your/project_source
 ```

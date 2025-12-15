@@ -94,16 +94,26 @@ echo "[Setup] Pulling and saving dummy docker image (alpine)..."
 docker pull alpine:latest > /dev/null 2>&1
 docker save -o "$TEST_DIR/alpine_image.tar" alpine:latest
 
+# 2.5 Docker Image (.tar.gz)
+echo "[Setup] Saving docker image as .tar.gz (alpine)..."
+# We re-use the image, but gzip it to test detection
+gzip -c "$TEST_DIR/alpine_image.tar" > "$TEST_DIR/alpine_image.tar.gz"
+
 # 3. Run Scanning
 echo "=========================================="
-echo "Running generate_sbom.sh..."
+echo "Running generate_sbom.sh (Project Scan)..."
 echo "=========================================="
 
 # Make sure script is executable
 chmod +x "$SBOM_SCRIPT"
 
-# Run scan on the test directory
+# Run scan on the test directory (Project Mode)
 "$SBOM_SCRIPT" "$TEST_DIR"
+
+# Run scan on specific files (File Mode Test)
+echo "------------------------------------------"
+echo "Running generate_sbom.sh (Single Image Scan - .tar.gz)..."
+"$SBOM_SCRIPT" "$TEST_DIR/alpine_image.tar.gz"
 
 # 4. Verify Results
 DATE_STR=$(date +"%Y%m%d")
@@ -123,7 +133,6 @@ check_sbom() {
     local FILE_PATTERN="$1"
     local EXPECTED_NAME="$2"
     
-    # Find file matching pattern
     FOUND_FILE=$(find "$TODAY_OUTPUT_DIR" -name "$FILE_PATTERN" | head -n 1)
     
     if [ -n "$FOUND_FILE" ]; then
@@ -137,17 +146,12 @@ check_sbom() {
     fi
 }
 
-# Check Node
-check_sbom "*package-lock.json_SBOM.json" "Node.js (package-lock.json)"
+# 1. Check Project SBOM (Directory Scan)
+# Expect: YYYYMMDD_test_workspace_Project_SBOM.json
+check_sbom "*test_workspace_Project_SBOM.json" "Project SBOM (Directory Scan)"
 
-# Check Python
-check_sbom "*requirements.txt_SBOM.json" "Python (requirements.txt)"
-
-# Check Java
-check_sbom "*pom.xml_SBOM.json" "Java (pom.xml)"
-
-# Check Docker Image
-check_sbom "*alpine_image.tar_SBOM.json" "Docker Image (alpine_image.tar)"
+# 2. Check Single File Scan (.tar.gz)
+check_sbom "*alpine_image.tar.gz_SBOM.json" "Docker Image (.tar.gz)"
 
 echo "=========================================="
 echo "Test Completed."
